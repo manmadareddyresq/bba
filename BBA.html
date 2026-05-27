@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>BBA — Be Bold. Be Anonymous.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080808;--card:#111;--border:#222;
+  --accent:#FF3B3B;--accent2:#FF6B6B;
+  --text:#EFEFEF;--muted:#666;
+  --male:#3B8BFF;--female:#FF3B8B;
+}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{font-family:'Syne',sans-serif;color:var(--text)}
+
+.app{
+  max-width:480px;margin:0 auto;
+  height:100vh;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+
+/* NOISE OVERLAY */
+.noise{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.5;
+}
+
+/* SCREENS */
+.screen{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  z-index:1;transition:opacity 0.3s,transform 0.3s;
+}
+.screen.hidden{opacity:0;pointer-events:none;transform:translateY(10px)}
+
+/* ── SPLASH ── */
+#splash{align-items:center;justify-content:center;padding:2rem 1.5rem;gap:1.8rem}
+
+.logo{font-size:56px;font-weight:800;letter-spacing:-3px;line-height:1;
+  background:linear-gradient(135deg,#fff 0%,#555 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;
+  color:var(--muted);margin-top:6px;text-align:center}
+
+.tagline{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);
+  text-align:center;line-height:2}
+.tagline b{color:var(--accent)}
+
+.section-label{font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:3px;color:var(--muted);text-align:center;text-transform:uppercase}
+
+.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.gbtn{
+  border:1px solid var(--border);background:var(--card);
+  border-radius:14px;padding:1.4rem 1rem;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.gbtn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.2s}
+.gbtn.male::before{background:radial-gradient(circle at 50% 0%,rgba(59,139,255,0.18),transparent 70%)}
+.gbtn.female::before{background:radial-gradient(circle at 50% 0%,rgba(255,59,139,0.18),transparent 70%)}
+.gbtn:hover::before,.gbtn.sel::before{opacity:1}
+.gbtn.male:hover,.gbtn.male.sel{border-color:var(--male)}
+.gbtn.female:hover,.gbtn.female.sel{border-color:var(--female)}
+.gbtn-icon{font-size:30px}
+.gbtn-name{font-size:13px;font-weight:700;letter-spacing:1px}
+.gbtn.male .gbtn-name{color:var(--male)}
+.gbtn.female .gbtn-name{color:var(--female)}
+.gbtn-count{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace}
+
+.connect-btn{
+  width:100%;padding:1rem;border-radius:12px;
+  background:var(--accent);border:none;color:#fff;
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:1px;cursor:pointer;transition:all 0.2s;
+  opacity:0.25;pointer-events:none;
+}
+.connect-btn.on{opacity:1;pointer-events:all}
+.connect-btn.on:hover{background:var(--accent2);transform:scale(1.02)}
+.connect-btn.on:active{transform:scale(0.97)}
+
+.reset-bar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px;border-top:1px solid var(--border);
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);
+  margin-top:auto;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* ── SEARCHING ── */
+#searching{align-items:center;justify-content:center;gap:2rem;padding:2rem}
+.radar{width:130px;height:130px;position:relative}
+.rring{position:absolute;border-radius:50%;border:1px solid var(--accent);
+  animation:rexpand 2s ease-out infinite}
+.rring:nth-child(1){inset:0;animation-delay:0s}
+.rring:nth-child(2){inset:22px;animation-delay:0.65s}
+.rring:nth-child(3){inset:44px;animation-delay:1.3s}
+.rcore{position:absolute;inset:48px;border-radius:50%;background:var(--accent)}
+@keyframes rexpand{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
+.search-info{text-align:center;font-family:'Space Mono',monospace;font-size:11px;
+  color:var(--muted);line-height:2}
+.search-info strong{color:var(--text);font-size:15px;display:block;margin-bottom:4px;
+  font-family:'Syne',sans-serif}
+.cancel-btn{padding:10px 28px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:'Space Mono',monospace;
+  font-size:11px;cursor:pointer;letter-spacing:2px;transition:all 0.2s}
+.cancel-btn:hover{border-color:#fff;color:#fff}
+
+/* ── CHAT ── */
+#chat{flex-direction:column}
+.chat-header{
+  padding:13px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+  background:rgba(8,8,8,0.95);backdrop-filter:blur(10px);
+}
+.pav{width:38px;height:38px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pname{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pstatus{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace}
+.ctimer{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);
+  display:flex;align-items:center;gap:4px;flex-shrink:0}
+.next-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-family:'Space Mono',monospace;
+  font-size:9px;cursor:pointer;letter-spacing:1px;transition:all 0.2s;flex-shrink:0}
+.next-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.messages::-webkit-scrollbar{width:2px}
+.messages::-webkit-scrollbar-thumb{background:var(--border)}
+
+.msg{display:flex;flex-direction:column;max-width:80%}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.them{align-self:flex-start;align-items:flex-start}
+.bubble{padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;word-break:break-word}
+.msg.me .bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg.them .bubble{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.mtime{font-size:9px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace}
+
+.sys-msg{align-self:center;font-family:'Space Mono',monospace;font-size:10px;
+  color:var(--muted);background:var(--card);border:1px solid var(--border);
+  padding:5px 14px;border-radius:20px;text-align:center}
+
+.input-area{
+  padding:12px 16px;border-top:1px solid var(--border);
+  display:flex;gap:10px;align-items:center;flex-shrink:0;
+  background:rgba(8,8,8,0.95);
+}
+.msg-input{
+  flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:24px;padding:10px 16px;color:var(--text);
+  font-family:'Syne',sans-serif;font-size:13px;outline:none;
+  transition:border-color 0.2s;
+}
+.msg-input:focus{border-color:#444}
+.msg-input::placeholder{color:var(--muted)}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--accent);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;flex-shrink:0}
+.send-btn:hover{background:var(--accent2);transform:scale(1.08)}
+.send-btn:active{transform:scale(0.95)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#1a1a1a;border:1px solid var(--border);color:var(--text);
+  font-family:'Space Mono',monospace;font-size:11px;padding:10px 20px;
+  border-radius:20px;opacity:0;transition:all 0.3s;z-index:999;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="app">
+
+  <!-- SPLASH -->
+  <div class="screen" id="splash">
+    <div style="text-align:center">
+      <div class="logo">BBA</div>
+      <div class="logo-sub">be bold. be anonymous.</div>
+    </div>
+    <div class="tagline"><b>No name.</b> No profile. No trace.<br>Just two strangers. Just right now.</div>
+    <div style="width:100%;display:flex;flex-direction:column;gap:14px">
+      <div class="section-label">i am —</div>
+      <div class="gender-grid">
+        <button class="gbtn male" onclick="pickGender('male',this)">
+          <div class="gbtn-icon">♂</div>
+          <div class="gbtn-name">MALE</div>
+          <div class="gbtn-count" id="m-count">— online</div>
+        </button>
+        <button class="gbtn female" onclick="pickGender('female',this)">
+          <div class="gbtn-icon">♀</div>
+          <div class="gbtn-name">FEMALE</div>
+          <div class="gbtn-count" id="f-count">— online</div>
+        </button>
+      </div>
+      <button class="connect-btn" id="connect-btn" onclick="startSearch()">FIND A STRANGER →</button>
+    </div>
+    <div class="reset-bar">
+      <div class="dot"></div>
+      <span>resets every 5h · next: <span id="countdown">--:--:--</span></span>
+    </div>
+  </div>
+
+  <!-- SEARCHING -->
+  <div class="screen hidden" id="searching">
+    <div class="radar">
+      <div class="rring"></div><div class="rring"></div><div class="rring"></div>
+      <div class="rcore"></div>
+    </div>
+    <div class="search-info">
+      <strong>searching...</strong>
+      finding a <span id="want-gender" style="color:var(--accent)">stranger</span><br>
+      stay anonymous · stay safe
+    </div>
+    <button class="cancel-btn" onclick="cancelSearch()">CANCEL</button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="screen hidden" id="chat">
+    <div class="chat-header">
+      <div class="pav" id="p-avatar">♀</div>
+      <div class="pinfo">
+        <div class="pname" id="p-name">stranger</div>
+        <div class="pstatus">● anonymous · encrypted</div>
+      </div>
+      <div class="ctimer"><div class="dot"></div><span id="chat-timer">--:--:--</span></div>
+      <button class="next-btn" onclick="nextStranger()">NEXT ↻</button>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input class="msg-input" id="msg-input" placeholder="say something..." maxlength="300"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"/>
+      <button class="send-btn" onclick="sendMessage()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, push, remove, serverTimestamp, onDisconnect, off }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEdEvH90IBsxuByehVv1CyJyAwTruZ5KU",
+  authDomain: "bbaucmh-f5a35.firebaseapp.com",
+  databaseURL: "https://bbaucmh-f5a35-default-rtdb.firebaseio.com",
+  projectId: "bbaucmh-f5a35",
+  storageBucket: "bbaucmh-f5a35.firebasestorage.app",
+  messagingSenderId: "69948000702",
+  appId: "1:69948000702:web:98e552bea47a8fb89e91ef"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ── STATE ──
+let myGender = null;
+let myId = 'u_' + Math.random().toString(36).slice(2,10);
+let chatId = null;
+let partnerId = null;
+let partnerGender = null;
+let searching = false;
+let msgListener = null;
+let partnerListener = null;
+let searchListener = null;
+
+// ── RESET LOGIC (5 hours) ──
+const RESET_MS = 5 * 60 * 60 * 1000;
+let nextReset = Math.ceil(Date.now() / RESET_MS) * RESET_MS;
+
+function updateCountdown() {
+  const diff = Math.max(0, nextReset - Date.now());
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('countdown').textContent =
+    `${pad(h)}:${pad(m)}:${pad(s)}`;
+  if (diff <= 0) { nextReset += RESET_MS; doReset(); }
+}
+
+async function doReset() {
+  // Clear all waiting queue and chats on reset
+  await remove(ref(db, 'queue'));
+  await remove(ref(db, 'chats'));
+  showToast('🔄 5h reset — everyone disconnected');
+  leaveChat();
+  goTo('splash');
+}
+
+// ── PRESENCE / ONLINE COUNT ──
+function trackPresence() {
+  if (!myGender) return;
+  const presRef = ref(db, `presence/${myGender}/${myId}`);
+  set(presRef, true);
+  onDisconnect(presRef).remove();
+}
+
+function watchOnline() {
+  onValue(ref(db, 'presence/male'), snap => {
+    const c = snap.exists() ? Object.keys(snap.val()).length : 0;
+    document.getElementById('m-count').textContent = c + ' online';
+  });
+  onValue(ref(db, 'presence/female'), snap => {
+    const c = snap.exists() ? Object.keys(snap.val()).length : 0;
+    document.getElementById('f-count').textContent = c + ' online';
+  });
+}
+
+// ── GENDER PICK ──
+window.pickGender = function(g, el) {
+  myGender = g;
+  document.querySelectorAll('.gbtn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  const btn = document.getElementById('connect-btn');
+  btn.classList.add('on');
+  btn.textContent = g === 'male' ? 'FIND A FEMALE STRANGER →' : 'FIND A MALE STRANGER →';
+  trackPresence();
+};
+
+// ── SEARCH ──
+window.startSearch = async function() {
+  if (!myGender) return;
+  searching = true;
+  goTo('searching');
+  const wantGender = myGender === 'male' ? 'female' : 'male';
+  document.getElementById('want-gender').textContent = wantGender + ' stranger';
+
+  // Check if someone is waiting in queue for my gender
+  const qRef = ref(db, `queue/${myGender}`);
+  const snap = await get(qRef);
+  const waiters = snap.exists() ? snap.val() : {};
+  // Find someone waiting who wants my gender
+  const waiterIds = Object.keys(waiters);
+
+  if (waiterIds.length > 0) {
+    // Match with first waiter
+    const waiterId = waiterIds[0];
+    const waiterData = waiters[waiterId];
+    await remove(ref(db, `queue/${myGender}/${waiterId}`));
+    chatId = 'chat_' + waiterId + '_' + myId;
+    partnerId = waiterId;
+    partnerGender = myGender; // waiter is same gender as what they queued under... 
+    // Actually waiter queued under their gender, we matched them
+    // waiterData.gender is the waiter's gender
+    partnerGender = waiterData.gender || myGender;
+    await set(ref(db, `chats/${chatId}`), {
+      users: { [myId]: myGender, [waiterId]: partnerGender },
+      started: serverTimestamp(),
+      active: true
+    });
+    enterChat();
+  } else {
+    // Join queue waiting for opposite gender
+    const myQRef = ref(db, `queue/${wantGender}/${myId}`);
+    await set(myQRef, { gender: myGender, ts: serverTimestamp() });
+    onDisconnect(myQRef).remove();
+    // Listen for a chat to be created for me
+    searchListener = onValue(ref(db, `chats`), async snap => {
+      if (!searching) return;
+      if (!snap.exists()) return;
+      const chats = snap.val();
+      for (const [cid, cdata] of Object.entries(chats)) {
+        if (cdata.users && cdata.users[myId] && cdata.active) {
+          chatId = cid;
+          const users = cdata.users;
+          partnerId = Object.keys(users).find(u => u !== myId);
+          partnerGender = partnerId ? users[partnerId] : wantGender;
+          await remove(ref(db, `queue/${wantGender}/${myId}`));
+          if (searchListener) off(ref(db, 'chats'), 'value', searchListener);
+          enterChat();
+          return;
+        }
+      }
+    });
+  }
+};
+
+window.cancelSearch = async function() {
+  searching = false;
+  const wantGender = myGender === 'male' ? 'female' : 'male';
+  await remove(ref(db, `queue/${wantGender}/${myId}`));
+  if (searchListener) off(ref(db, 'chats'), 'value', searchListener);
+  goTo('splash');
+};
+
+// ── CHAT ──
+function enterChat() {
+  searching = false;
+  const pg = partnerGender || 'male';
+  const av = document.getElementById('p-avatar');
+  av.textContent = pg === 'female' ? '♀' : '♂';
+  av.style.background = pg === 'female' ? '#1a0a12' : '#0a0f1a';
+  document.getElementById('p-name').textContent = 'stranger #' + (partnerId || '').slice(-4);
+  document.getElementById('messages').innerHTML = '';
+  addSysMsg('connected · say hi 👋');
+  goTo('chat');
+  listenMessages();
+  watchPartner();
+}
+
+function listenMessages() {
+  if (!chatId) return;
+  const msgsRef = ref(db, `chats/${chatId}/messages`);
+  msgListener = onValue(msgsRef, snap => {
+    if (!snap.exists()) return;
+    const msgs = snap.val();
+    const container = document.getElementById('messages');
+    container.innerHTML = '';
+    Object.values(msgs).sort((a,b) => a.ts - b.ts).forEach(m => {
+      addMsgEl(m.text, m.sender === myId ? 'me' : 'them', m.ts);
+    });
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+function watchPartner() {
+  if (!chatId) return;
+  partnerListener = onValue(ref(db, `chats/${chatId}/active`), snap => {
+    if (snap.exists() && snap.val() === false) {
+      addSysMsg('stranger disconnected · finding next?');
+      showToast('Stranger left the chat');
+    }
+  });
+}
+
+window.sendMessage = async function() {
+  const inp = document.getElementById('msg-input');
+  const txt = inp.value.trim();
+  if (!txt || !chatId) return;
+  inp.value = '';
+  await push(ref(db, `chats/${chatId}/messages`), {
+    sender: myId,
+    text: txt,
+    ts: Date.now()
+  });
+};
+
+window.nextStranger = async function() {
+  await leaveChat();
+  startSearch();
+};
+
+async function leaveChat() {
+  if (chatId) {
+    await set(ref(db, `chats/${chatId}/active`), false);
+    if (msgListener) off(ref(db, `chats/${chatId}/messages`), 'value', msgListener);
+    if (partnerListener) off(ref(db, `chats/${chatId}/active`), 'value', partnerListener);
+  }
+  chatId = null; partnerId = null; partnerGender = null;
+}
+
+// ── UI HELPERS ──
+function addMsgEl(text, side, ts) {
+  const container = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg ' + side;
+  const t = ts ? new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : 'now';
+  d.innerHTML = `<div class="bubble">${escHtml(text)}</div><div class="mtime">${t}</div>`;
+  container.appendChild(d);
+  container.scrollTop = container.scrollHeight;
+}
+
+function addSysMsg(text) {
+  const container = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'sys-msg';
+  d.textContent = text;
+  container.appendChild(d);
+  container.scrollTop = container.scrollHeight;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+// chat timer
+let chatSecs = 5*3600;
+setInterval(() => {
+  updateCountdown();
+  if (document.getElementById('chat').classList.contains('hidden')) return;
+  chatSecs = Math.max(0, Math.floor((nextReset - Date.now()) / 1000));
+  const h = Math.floor(chatSecs/3600);
+  const m = Math.floor((chatSecs%3600)/60);
+  const s = chatSecs%60;
+  document.getElementById('chat-timer').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+}, 1000);
+
+// ── INIT ──
+watchOnline();
+updateCountdown();
+goTo('splash');
+
+// Cleanup on tab close
+window.addEventListener('beforeunload', async () => {
+  if (myGender) await remove(ref(db, `presence/${myGender}/${myId}`));
+  await leaveChat();
+});
+</script>
+</body>
+</html>
